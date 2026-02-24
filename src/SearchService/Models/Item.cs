@@ -1,10 +1,9 @@
-using System;
+using MongoDB.Entities;
 
-namespace AuctionService.DTOs;
+namespace SearchService.Models;
 
-public class AuctionDto
+public class Item : Entity
 {
-    public Guid Id { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public int ReservePrice { get; set; }
@@ -14,8 +13,6 @@ public class AuctionDto
     public int? CurrentHighBid { get; set; }
     public DateTime AuctionEnd { get; set; }
     public required string Status { get; set; }
-
-    // Item details
     public required string Make { get; set; }
     public required string Model { get; set; }
     public int Year { get; set; }

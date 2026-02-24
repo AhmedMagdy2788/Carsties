@@ -11,5 +11,19 @@ services:
       - "5432:5432"
     volumes:
       - postgres_auction-db:/var/lib/postgresql/
+
+  Search-db:
+    image: mongo:latest
+    container_name: search-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mongopw
+      MONGO_INITDB_DATABASE: searchdb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_search_db:/data/db
 volumes:
   postgres_auction-db:
+  mongo_search_db:

@@ -2,6 +2,7 @@ using AuctionService.Data;
 using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,14 +13,27 @@ namespace AuctionService.Controllers;
 public class AuctionsController(AuctionDbContext context, IMapper mapper) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AuctionDto>>> GetAuctions()
+    public async Task<ActionResult<IEnumerable<AuctionDto>>> GetAuctions(string? date)
     {
-        var auctions = await context
-            .Auctions.Include(x => x.Item)
-            .OrderBy(x => x.Item.Make)
-            .ToListAsync();
+        var query = context.Auctions.OrderBy(x => x.Item.Make).AsQueryable();
+        if (!string.IsNullOrEmpty(date))
+        {
+            if (DateTime.TryParse(date, out var parsedDate))
+            {
+                query = query.Where(x => x.UpdatedAt.CompareTo(parsedDate.ToUniversalTime()) > 0);
+            }
+            else
+            {
+                return BadRequest("Invalid date format. Please use a valid date string.");
+            }
+        }
+        return Ok(await query.ProjectTo<AuctionDto>(mapper.ConfigurationProvider).ToListAsync());
+        // var auctions = await query
+        //     .Include(x => x.Item)
+        //     .OrderBy(x => x.Item.Make)
+        //     .ToListAsync();
 
-        return Ok(mapper.Map<List<AuctionDto>>(auctions));
+        // return Ok(mapper.Map<List<AuctionDto>>(auctions));
     }
 
     [HttpGet("{id}")]
